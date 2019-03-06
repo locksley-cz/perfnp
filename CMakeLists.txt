@@ -22,18 +22,24 @@ set(PERFNP_CLI_DIR ${PERFNP_DIR}/cli)
 set(PERFNP_TEST_DIR ${PERFNP_DIR}/tests)
 
 set(PERFNP_HEADER_FILES
+    ${PERFNP_LIB_DIR}/config.hpp
     ${PERFNP_LIB_DIR}/exec.hpp
     ${PERFNP_LIB_DIR}/tools.hpp
 )
 
 set(PERFNP_LIB_FILES
+    ${PERFNP_LIB_DIR}/config.cpp
     ${PERFNP_LIB_DIR}/exec.cpp
 )
 
 set(PERFNP_TEST_FILES
+    ${PERFNP_TEST_DIR}/config_test.cpp
     ${PERFNP_TEST_DIR}/exec_test.cpp
     ${PERFNP_TEST_DIR}/tools_test.cpp
 )
+
+# Use all single-header libraries
+include_directories(SYSTEM ${PERFNP_DIR}/lib)
 
 # Use folders to group files when generating project files
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -78,8 +84,8 @@ add_executable(perfnp-tests
     ${PERFNP_TEST_FILES}
 )
 
+# Adding CATCH_CONFIG_FAST_COMPILE speeds up compilation
 target_compile_definitions(perfnp-tests PRIVATE
-    CATCH_CONFIG_FAST_COMPILE
     $<$<PLATFORM_ID:Windows>:CATCH_CONFIG_WINDOWS_CRTDBG>
 )
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -110,7 +116,7 @@ foreach(target perfnp-tests ${PERFNP_BINARIES})
     )
     endif()
     if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        target_compile_options(${target} PUBLIC /W4 /wd4800 /wd4200 /wd4245 /w44265 /w44061 /w44062 /WX)
+        target_compile_options(${target} PUBLIC /W4 /wd4800 /wd4200 /wd4245 /w44265 /w44061 /w44062)
     endif()
 endforeach()
 
