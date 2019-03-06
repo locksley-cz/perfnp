@@ -12,5 +12,5 @@ using namespace perfnp;
 TEST_CASE("ExecBin::ExecBin")
 {
     ExecBin eb(std::string("foo"));
-    REQUIRE(eb.binary() == "bar");
+    REQUIRE(eb.binary() == "foo");
 }
