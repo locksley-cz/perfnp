@@ -1,0 +1,44 @@
+version: "{build}"
+
+branches:
+  except:
+    - /travis.*/
+
+os:
+  - Visual Studio 2017
+
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - ps: . .\misc\appveyor\library.ps1; AppVeyorInstall
+
+platform:
+  - Win32
+  - x64
+
+configuration:
+  - Debug
+  - Release
+
+before_build:
+  - ps: . .\misc\appveyor\library.ps1; AppVeyorConfigure
+
+build:
+  project: build\perfnp.sln
+  parallel: true
+  verbosity: minimal
+
+test_script:
+  - set CTEST_OUTPUT_ON_FAILURE=1
+  - ps: . .\misc\appveyor\library.ps1; AppVeyorTests
+
+environment:
+  matrix:
+    - additional_flags: "/std:c++11"
+    - additional_flags: "/std:c++17"
+
+matrix:
+  exclude:
+    - additional_flags: "/std:c++17"
+      platform: Win32
