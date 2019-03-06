@@ -1,0 +1,21 @@
+coverage:
+  precision: 2
+  round: nearest
+  range: "80...100"
+  status:
+    project:
+      default:
+        threshold: 10%
+    patch:
+      default:
+        target: 80%
+
+  ignore:
+    - "tests/**"
+
+
+codecov:
+  branch: master
+
+comment:
+  layout: "diff"

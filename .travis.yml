@@ -1,0 +1,124 @@
+language: cpp
+sudo: false
+
+branches:
+  except:
+  - /appveyor.*/
+
+common_sources: &all_sources
+  - ubuntu-toolchain-r-test
+  - llvm-toolchain-trusty
+  - llvm-toolchain-trusty-3.9
+  - llvm-toolchain-trusty-4.0
+  - llvm-toolchain-trusty-5.0
+  - llvm-toolchain-trusty-6.0
+
+
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      addons:
+          apt:
+              sources: *all_sources
+              packages: ['clang-3.5']
+      env: COMPILER='clang++-3.5' CXX_STANDARD='11'
+
+    - os: linux
+      compiler: clang
+      addons:
+          apt:
+              sources: *all_sources
+              packages: ['clang-6.0']
+      env: COMPILER='clang++-6.0' CXX_STANDARD='11'
+
+    # GCC: 1 old and 1 new version
+
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: *all_sources
+          packages: ['g++-4.8', 'lcov']
+      env: COMPILER='g++-4.8' CODECOV=1 CXX_STANDARD='11'
+
+    - os: linux
+      compiler: gcc
+      addons: &gcc8
+        apt:
+          sources: *all_sources
+          packages: ['g++-8']
+      env: COMPILER='g++-8' CXX_STANDARD='11'
+
+    # OS-X
+
+    - os: osx
+      osx_image: xcode7.3
+      compiler: clang
+      env: COMPILER='clang++' CXX_STANDARD='11'
+
+    - os: osx
+      osx_image: xcode9.1
+      compiler: clang
+      env: COMPILER='clang++' CXX_STANDARD='11'
+
+    # C++17 on modern compilers
+
+    - os: linux
+      compiler: gcc
+      addons: &gcc8
+        apt:
+          sources: *all_sources
+          packages: ['g++-8']
+      env: COMPILER='g++-8' CODECOV=1 CXX_STANDARD='17'
+
+    - os: linux
+      compiler: clang
+      addons:
+          apt:
+              sources: *all_sources
+              packages: ['clang-6.0', 'libstdc++-6-dev']
+      env: COMPILER='clang++-6.0' CXX_STANDARD='17'
+
+    - os: osx
+      osx_image: xcode9.1
+      compiler: clang
+      env: COMPILER='clang++' CXX_STANDARD='17'
+
+
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.12/cmake-3.12.1-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+        which cmake || brew install cmake;
+    fi
+
+
+before_script:
+  - export CXX=${COMPILER}
+  - cd ${TRAVIS_BUILD_DIR}
+
+script:
+  # Release build goes first (it's faster)
+  - cmake -H. -Bbuild/release -DCMAKE_BUILD_TYPE=Release -DHUBERO_ENABLE_COVERAGE=${CODECOV} -DCMAKE_CXX_STANDARD=${CXX_STANDARD}
+  - cd build/release
+  - make -j 2
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
+  - cd ../..
+  # Debug build goes second (it's slower)
+  - cmake -H. -Bbuild/debug -DCMAKE_BUILD_TYPE=Debug -DHUBERO_ENABLE_COVERAGE=${CODECOV} -DCMAKE_CXX_STANDARD=${CXX_STANDARD}
+  - cd build/debug
+  - make -j 2
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
+  # Capture code coverage
+  - |
+    if [[ "${CODECOV}" == "1" ]]; then
+      make gcov
+      make lcov
+      bash <(curl -s https://codecov.io/bash) -X gcov || echo "Codecov did not collect coverage reports"
+    fi
