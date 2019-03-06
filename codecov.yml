@@ -11,6 +11,8 @@ coverage:
         target: 80%
 
   ignore:
+    - "cli/**"
+    - "lib/**"
     - "tests/**"
 
 
