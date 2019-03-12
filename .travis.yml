@@ -105,13 +105,13 @@ before_script:
 
 script:
   # Release build goes first (it's faster)
-  - cmake -H. -Bbuild/release -DCMAKE_BUILD_TYPE=Release -DHUBERO_ENABLE_COVERAGE=${CODECOV} -DCMAKE_CXX_STANDARD=${CXX_STANDARD}
+  - cmake -H. -Bbuild/release -DCMAKE_BUILD_TYPE=Release -DPERFNP_ENABLE_COVERAGE=${CODECOV} -DCMAKE_CXX_STANDARD=${CXX_STANDARD}
   - cd build/release
   - make -j 2
   - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
   - cd ../..
   # Debug build goes second (it's slower)
-  - cmake -H. -Bbuild/debug -DCMAKE_BUILD_TYPE=Debug -DHUBERO_ENABLE_COVERAGE=${CODECOV} -DCMAKE_CXX_STANDARD=${CXX_STANDARD}
+  - cmake -H. -Bbuild/debug -DCMAKE_BUILD_TYPE=Debug -DPERFNP_ENABLE_COVERAGE=${CODECOV} -DCMAKE_CXX_STANDARD=${CXX_STANDARD}
   - cd build/debug
   - make -j 2
   - CTEST_OUTPUT_ON_FAILURE=1 ctest -j 2
