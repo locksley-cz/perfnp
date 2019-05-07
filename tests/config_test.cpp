@@ -61,14 +61,14 @@ TEST_CASE("Config::arguments")
         SECTION("only one argument")
         {
             Config c(R"({ "arguments" : ["one"]})"_json);
-            std::vector<std::string> expected{"one"};
+            Arguments expected({"one"});
             REQUIRE(c.arguments() == expected);
         }
 
         SECTION("three arguments")
         {
             Config c(R"({"arguments":["$blockvar", "$parameter", "$file"] })"_json);
-            std::vector<std::string> expected{"$blockvar", "$parameter", "$file"};
+            Arguments expected({"$blockvar", "$parameter", "$file"});
             REQUIRE(c.arguments() == expected);
         }
     }
@@ -78,7 +78,7 @@ TEST_CASE("Config::arguments")
         SECTION("no arguments")
         {
             Config c(R"({ "arguments" : []})"_json);
-            std::vector<std::string> expected;
+            Arguments expected;
             REQUIRE(c.arguments() == expected);
         }
     }
@@ -127,9 +127,8 @@ TEST_CASE("Config::parameters")
     {
         SECTION("no parameters at all")
         {
-            Config c(R"({"parameters":{} })"_json);
-            std::vector<Parameter> expected;
-            REQUIRE(c.parameters() == expected);
+            Config c(R"({ "parameters":{} })"_json);
+            REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
     }
 

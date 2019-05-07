@@ -3,10 +3,10 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#include "perfnp/config.hpp"
+#include "config.hpp"
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
+//#include <stdexcept>
 #include <cassert>
 #include <string>
 
@@ -47,7 +47,7 @@ std::string Config::command() const {
 
 
 
-std::vector<std::string> Config::arguments() const {
+Arguments Config::arguments() const {
     if (m_json.find("arguments") == m_json.end()) {
         throw std::runtime_error("Configuration JSON"
             " does not have the \"arguments\" field.");
@@ -73,12 +73,13 @@ std::vector<std::string> Config::arguments() const {
         v_arguments.push_back(j_item.get<std::string>());
     }
 
-    return v_arguments;
+    return Arguments(v_arguments);
 }
 
 
 
 std::vector<Parameter> Config::parameters() const {
+
     if (m_json.find("parameters") == m_json.end()) {
         return {};
     }
@@ -87,6 +88,13 @@ std::vector<Parameter> Config::parameters() const {
         throw std::runtime_error("Configuration JSON's"
             " \"parameters\" field is not an object.");
     }
+
+    if (m_json.at("parameters").empty()) {
+        throw std::runtime_error("Configuration JSON's"
+            " \"parameters\" field is empty.");
+    }
+
+    std::vector<Parameter> retval;
 
     std::vector<Parameter> v_parameters;
     for (const auto& kv : m_json.at("parameters").items()) {

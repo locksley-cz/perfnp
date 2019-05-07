@@ -29,15 +29,55 @@ public:
     Parameter() = default;
 
     //! Initialize all fields by the given values
-    Parameter(std::string name, std::vector<std::string> values)
+    explicit Parameter(std::string name, std::vector<std::string> values)
     : m_name(name)
     , m_values(values)
     {}
+
+    //! Name of the variable
+    const std::string& name() const {
+        return m_name;
+    }
+
+    //! Values the variable can take
+    const std::vector<std::string>& values() const {
+        return m_values;
+    }
 
     //! Equality operator compares all fields
     bool operator==(const Parameter& rhs) const {
         return m_name == rhs.m_name
             && m_values == rhs.m_values;
+    }
+};
+
+
+
+/*!
+ * List of command-line arguments
+ */
+class Arguments {
+
+    //! List of command-line arguments
+    std::vector<std::string> m_args;
+
+public:
+    //! Default arguments leaves all fields empty
+    Arguments() = default;
+
+    //! Initialize all fields by the given values
+    explicit Arguments(std::vector<std::string> values)
+    : m_args(values)
+    {}
+
+    //! List of command-line arguments
+    const std::vector<std::string>& values() const {
+        return m_args;
+    }
+
+    //! Equality operator compares all fields
+    bool operator== (const Arguments& rhs) const {
+        return m_args == rhs.m_args;
     }
 };
 
@@ -65,7 +105,7 @@ public:
     std::string command() const;
 
     //! List of arguments given to the binary
-    std::vector<std::string> arguments() const;
+    Arguments arguments() const;
 
     //! List of all parameters and their values
     std::vector<Parameter> parameters() const;
