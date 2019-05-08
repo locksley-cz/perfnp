@@ -15,6 +15,7 @@ set(CMAKE_CXX_STANDARD 11) #Pavla
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
+
 # List sources
 set(PERFNP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(PERFNP_LIB_DIR ${PERFNP_DIR}/src/perfnp)
@@ -24,19 +25,24 @@ set(PERFNP_TEST_DIR ${PERFNP_DIR}/tests)
 set(PERFNP_HEADER_FILES
     ${PERFNP_LIB_DIR}/combin.hpp
     ${PERFNP_LIB_DIR}/config.hpp
+    ${PERFNP_LIB_DIR}/dataset.hpp
     ${PERFNP_LIB_DIR}/exec.hpp
+    ${PERFNP_LIB_DIR}/scheduler.hpp
     ${PERFNP_LIB_DIR}/tools.hpp
 )
 
 set(PERFNP_LIB_FILES
     ${PERFNP_LIB_DIR}/combin.cpp
     ${PERFNP_LIB_DIR}/config.cpp
+    ${PERFNP_LIB_DIR}/dataset.cpp
+    ${PERFNP_LIB_DIR}/scheduler.cpp
     ${PERFNP_LIB_DIR}/exec.cpp
 )
 
 set(PERFNP_TEST_FILES
     ${PERFNP_TEST_DIR}/combin_test.cpp
     ${PERFNP_TEST_DIR}/config_test.cpp
+    ${PERFNP_TEST_DIR}/dataset_test.cpp
     ${PERFNP_TEST_DIR}/exec_test.cpp
     ${PERFNP_TEST_DIR}/tools_test.cpp
 )

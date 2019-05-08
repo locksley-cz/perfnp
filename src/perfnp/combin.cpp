@@ -37,7 +37,6 @@ std::vector<CommandLine> combine(
 			// std::cout << arr[i][indices[i]] << " ";
 			vector_string_temp.push_back(arr[i][indices[i]]);
 		}
-		// std::cout << std::endl;
 
 		CommandLine cmdline_local(cmd_local, vector_string_temp);
 		output.push_back(cmdline_local);
