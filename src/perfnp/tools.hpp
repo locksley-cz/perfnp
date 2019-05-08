@@ -37,11 +37,14 @@
 // ================================================ //
 
 #if defined(__GNUC__)
-// gcc + clang
 #include <cxxabi.h>
 #include <cstdlib>
-#else // MSVC
+
+#elif defined(_WIN32)
 #include <sstream>
+
+#else
+#error "Unsupported platform"
 #endif
 
 namespace perfnp {
@@ -50,7 +53,7 @@ namespace tools {
     template<class type>
     std::string type_to_string()
     {
-#if defined(__GNUC__) // gcc + clang
+#if defined(__GNUC__)
         int status;
         char* name = abi::__cxa_demangle(
             typeid(type).name(),
@@ -77,7 +80,7 @@ namespace tools {
             ) + std::to_string(status) );
         }
 
-#else // MSVC
+#elif defined(_WIN32)
         std::stringstream type_name_stream;
         type_name_stream << typeid(type).name();
         auto type_name_str = type_name_stream.str();
@@ -89,6 +92,8 @@ namespace tools {
         } else {
             return type_name_str;
         }
+#else
+#error "Unsupported platform"
 #endif
     } // type_to_string
 
