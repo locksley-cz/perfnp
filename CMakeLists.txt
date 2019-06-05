@@ -58,13 +58,13 @@ source_group("CLI" FILES ${PERFNP_CLI_DIR})
 source_group("Tests" FILES ${PERFNP_TEST_DIR})
 
 # Target: The Library
-add_library(perfnp ${PERFNP_LIB_FILES})
-target_include_directories(perfnp PUBLIC
+add_library(libperfnp ${PERFNP_LIB_FILES})
+target_include_directories(libperfnp PUBLIC
     $<BUILD_INTERFACE:${PERFNP_DIR}/src>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 # Effectively set C++11 (at least)
-target_compile_features(perfnp
+target_compile_features(libperfnp
   INTERFACE
     cxx_alignas
     cxx_alignof
@@ -88,30 +88,30 @@ target_compile_features(perfnp
 )
 
 # Target: Unit tests
-add_executable(perfnp-tests
+add_executable(tests
     ${PERFNP_TEST_DIR}/catch_main.cpp
     ${PERFNP_TEST_FILES}
 )
 
 # Adding CATCH_CONFIG_FAST_COMPILE speeds up compilation
-target_compile_definitions(perfnp-tests PRIVATE
+target_compile_definitions(tests PRIVATE
     $<$<PLATFORM_ID:Windows>:CATCH_CONFIG_WINDOWS_CRTDBG>
 )
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # STL iterators are checked on Linux
-    target_compile_definitions(perfnp-tests PRIVATE
+    target_compile_definitions(tests PRIVATE
         $<$<PLATFORM_ID:Linux>:_HAS_ITERATOR_DEBUGGING>
     )
 endif()
 
 # Target: Executable files
-add_executable(perfnp-main ${PERFNP_CLI_DIR}/main.cpp)
+add_executable(perfnp ${PERFNP_CLI_DIR}/main.cpp)
 set(PERFNP_BINARIES
-    perfnp-main
+    perfnp
 )
 
-foreach(target perfnp-tests ${PERFNP_BINARIES})
-    target_link_libraries(${target} perfnp)
+foreach(target tests ${PERFNP_BINARIES})
+    target_link_libraries(${target} libperfnp)
 
     # Enable coverage reporting
     if (PERFNP_ENABLE_COVERAGE)
@@ -142,7 +142,7 @@ include(CTest)
 foreach(test_file ${PERFNP_TEST_FILES})
     get_filename_component(no_ext ${test_file} NAME_WE)
     if( no_ext MATCHES "_test")
-        add_test(NAME ${no_ext} COMMAND perfnp-tests -r compact -\# ~[.] [\#${no_ext}])
+        add_test(NAME ${no_ext} COMMAND tests -r compact -\# ~[.] [\#${no_ext}])
         set_tests_properties(${no_ext} PROPERTIES FAIL_REGULAR_EXPRESSION "No tests ran.")
         set_tests_properties(${no_ext} PROPERTIES TIMEOUT 500)
     endif()
