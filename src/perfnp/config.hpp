@@ -98,6 +98,11 @@ public:
     : m_json(json)
     {}
 
+    //! Create a config file given a JSON input
+    Config(nlohmann::json&& json)
+    : m_json(json)
+    {}
+
     //! Time-limit to execute the binary, in seconds
     unsigned timeout() const;
 
