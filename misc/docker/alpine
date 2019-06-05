@@ -1,0 +1,10 @@
+FROM alpine:3.9
+
+# Install clang + cmake
+RUN apk add build-base gcc abuild binutils binutils-doc gcc-doc
+RUN apk add cmake bash
+
+# Build perfnp
+ADD . /opt/perfnp
+WORKDIR /opt/perfnp
+RUN cd /opt/perfnp && misc/build.sh
