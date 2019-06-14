@@ -105,6 +105,21 @@ std::vector<unsigned> calculate_time_success(
     }
     return time_s;
 }
+
+unsigned calculate_number_of_successful_runs(
+    const std::vector<ExecResult>& results,
+    unsigned timeout)
+{
+    int n_success = 0;
+        for (size_t i=0; i < results.size();i++)
+        {
+            if ((results.at(i).exit_code() == 0)&&(results.at(i).runtime() <= timeout)) {
+                n_success++;
+            }
+        }
+    return n_success;
+}
+
 } // anonymous names
 
 unsigned perfnp::Dataset::median_runtime_of_all_runs() const
@@ -129,4 +144,9 @@ unsigned perfnp::Dataset::mad_runtime_of_all_successful_runs() const
 {
     auto runtimes = calculate_time_success(m_results, m_timeout);
     return medianAbsoluteDeviation(runtimes);
+}
+unsigned perfnp::Dataset::number_of_all_successful_runs() const
+{
+    auto number_success = calculate_number_of_successful_runs(m_results, m_timeout);
+    return number_success;
 }

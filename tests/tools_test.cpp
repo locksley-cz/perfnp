@@ -6,6 +6,9 @@
 #include "catch.hpp"
 
 #include <perfnp/tools.hpp>
+
+#include <sstream>
+
 using namespace perfnp::tools;
 
 TEST_CASE("type_to_string::primitive_types")
@@ -38,4 +41,24 @@ TEST_CASE("type_to_string::complex_types")
     REQUIRE(type_to_string<n::U>() == "n::U");
     REQUIRE(type_to_string<long>() == "long");
     REQUIRE(type_to_string<unsigned long>() == "unsigned long");
+}
+
+TEST_CASE("StreamFormatGuard")
+{
+    std::stringstream ss;
+    ss << 10;
+    REQUIRE(ss.str() == "10");
+
+    { // new scope forces sfg's destructor
+        StreamFormatGuard sfg(ss);
+
+        ss.str("");
+        ss << std::hex; // must be reverted
+        ss << 10;
+        REQUIRE(ss.str() == "a");
+    }
+
+    ss.str("");
+    ss << 10;
+    REQUIRE(ss.str() == "10");
 }

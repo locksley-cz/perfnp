@@ -27,6 +27,8 @@ set(PERFNP_HEADER_FILES
     ${PERFNP_LIB_DIR}/config.hpp
     ${PERFNP_LIB_DIR}/dataset.hpp
     ${PERFNP_LIB_DIR}/exec.hpp
+    ${PERFNP_LIB_DIR}/logger.hpp
+    ${PERFNP_LIB_DIR}/option.hpp
     ${PERFNP_LIB_DIR}/scheduler.hpp
     ${PERFNP_LIB_DIR}/tools.hpp
 )
@@ -35,8 +37,8 @@ set(PERFNP_LIB_FILES
     ${PERFNP_LIB_DIR}/combin.cpp
     ${PERFNP_LIB_DIR}/config.cpp
     ${PERFNP_LIB_DIR}/dataset.cpp
-    ${PERFNP_LIB_DIR}/scheduler.cpp
     ${PERFNP_LIB_DIR}/exec.cpp
+    ${PERFNP_LIB_DIR}/logger.cpp
 )
 
 set(PERFNP_TEST_FILES

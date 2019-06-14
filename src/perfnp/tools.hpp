@@ -6,6 +6,8 @@
 #ifndef PERFNP_TOOLS_H_
 #define PERFNP_TOOLS_H_
 
+#include <ios>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
@@ -96,6 +98,40 @@ namespace tools {
 #error "Unsupported platform"
 #endif
     } // type_to_string
+
+
+
+    /*!
+     * Saves the state of a stream and restores it in the destructor
+     *
+     * Use this in a function, which manipulates stream formatting.
+     * At the end of the scope, the destructor is called and
+     * formatting is automatically restored to its original state.
+     */
+    class StreamFormatGuard {
+
+        std::ostream& m_stream;
+
+        std::ios m_state;
+
+    public:
+        /*!
+         * Create a formatting guard.
+         *
+         * @param[in] stream stream, whose state is stored and restored
+         */
+        StreamFormatGuard(std::ostream& stream)
+        : m_stream(stream)
+        , m_state(nullptr)
+        {
+            m_state.copyfmt(stream);
+        }
+
+        ~StreamFormatGuard()
+        {
+            m_stream.copyfmt(m_state);
+        }
+    }; // StreamFormatGuard
 
 } // tools
 } // perfnp

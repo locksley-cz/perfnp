@@ -64,7 +64,8 @@ public:
      * @return the mad or 0 if no successful run has happened
      */
     unsigned mad_runtime_of_all_successful_runs() const;
-
+    //number of successful runs
+    unsigned number_of_all_successful_runs() const;
 }; // Dataset
 } // perfnp
 #endif // PERFNP_DATASET_H_

@@ -182,3 +182,35 @@ TEST_CASE("Dataset::mad_runtime_of_all_successful_runs")
         }
     }
 }
+
+TEST_CASE("Dataset::number_of_all_successful_runs")
+{
+    SECTION("Typical usage")
+    {
+        SECTION("Non-zero exit codes are removed 1") {
+            Dataset d(10, { {0,3}, {1,4}, {0,5}, {3,6}, {4,7} });
+            REQUIRE(d.number_of_all_successful_runs() == 2);
+        }
+        SECTION("Overly large runtime is trimmed") {
+            Dataset d(10, { {0,2}, {0,20}, {0,6} });
+            REQUIRE(d.number_of_all_successful_runs() == 2);
+        }
+        SECTION("Non-zero exit codes are removed 2") {
+            Dataset d(10, { {2,1}, {0,4}, {1,4}, {0,9} });
+            REQUIRE(d.number_of_all_successful_runs() == 2);
+        }
+    }
+
+    SECTION("Corner cases")
+    {
+        SECTION("No samples lead to a zero result") {
+            Dataset d(10, {});
+            REQUIRE(d.number_of_all_successful_runs() == 0);
+        }
+        SECTION("No successful sample leads to zero") {
+            Dataset d(10, { {1,1}, {2,2} });
+            REQUIRE(d.number_of_all_successful_runs() == 0);
+        }
+
+    }
+}

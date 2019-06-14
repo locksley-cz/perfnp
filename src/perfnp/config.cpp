@@ -139,3 +139,38 @@ std::vector<Parameter> Config::parameters() const {
 
     return v_parameters;
 }
+
+
+
+Optional<std::string> Config::logging_job_csv_file() const
+{
+    auto j_logging = m_json.find("logging");
+    if (j_logging == m_json.end()) {
+        return Optional<std::string>::empty();
+    }
+    if (!j_logging->is_object()) {
+        throw std::runtime_error("The 'logging' field in the"
+                        " configuration json is not an object.");
+    }
+
+    auto j_job = j_logging->find("job");
+    if (j_job == j_logging->end()) {
+        return Optional<std::string>::empty();
+    }
+    if (!j_job->is_object()) {
+        throw std::runtime_error("The 'logging.job' field in the"
+                        " configuration json is not an object.");
+    }
+
+    auto j_csv = j_job->find("csv");
+    if (j_csv == j_job->end()) {
+        return Optional<std::string>::empty();
+    }
+
+    if (!j_csv->is_string()) {
+        throw std::runtime_error("The 'logging.job.csv' field in the"
+                        " configuration json is not a string.");
+    }
+
+    return Optional<std::string>::make(j_csv->get<std::string>());
+}

@@ -6,6 +6,8 @@
 #ifndef PERFNP_CONFIG_H_
 #define PERFNP_CONFIG_H_
 
+#include "option.hpp"
+
 #include <nlohmann/json.hpp>
 
 #include <string>
@@ -114,6 +116,9 @@ public:
 
     //! List of all parameters and their values
     std::vector<Parameter> parameters() const;
+
+    //! File name for the CSV job log
+    Optional<std::string> logging_job_csv_file() const;
 
 }; // Config
 } // perfnp

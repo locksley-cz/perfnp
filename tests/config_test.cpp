@@ -165,3 +165,42 @@ TEST_CASE("Config::parameters")
         }
     }
 }
+
+TEST_CASE("Config::csv_output_file")
+{
+    SECTION("positive cases")
+    {
+        SECTION("value is present")
+        {
+            Config c(R"({"logging":{"job":{"csv":"config.json"}}})"_json);
+            auto expected = Optional<std::string>::make("x.csv");
+            REQUIRE(c.logging_job_csv_file() == expected);
+        }
+
+        SECTION("value is missing")
+        {
+            Config c(R"({})"_json);
+            auto expected = Optional<std::string>::empty();
+            REQUIRE(c.logging_job_csv_file() == expected);
+        }
+    }
+
+    SECTION("negative cases")
+    {
+        SECTION("wrong type 1")
+        {
+            Config c(R"({"logging":{"job":{"csv":1}}})"_json);
+            REQUIRE_THROWS_AS(c.logging_job_csv_file(), std::runtime_error);
+        }
+        SECTION("wrong type 2")
+        {
+            Config c(R"({"logging":{"job":[]}})"_json);
+            REQUIRE_THROWS_AS(c.logging_job_csv_file(), std::runtime_error);
+        }
+        SECTION("wrong type 3")
+        {
+            Config c(R"({"logging":"a"})"_json);
+            REQUIRE_THROWS_AS(c.logging_job_csv_file(), std::runtime_error);
+        }
+    }
+}
