@@ -230,7 +230,7 @@ ExecResult ExecBin::execute() const
 {
     STARTUPINFOW si;
     ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
+    si.cb = sizeof(STARTUPINFOW);
 
     PROCESS_INFORMATION pi;
     ZeroMemory(&pi, sizeof(pi));
@@ -274,6 +274,20 @@ ExecResult ExecBin::execute() const
     HandleGuard hProcessGuard(pi.hProcess);
     HandleGuard hThreadGuard(pi.hThread);
 
+    // In order to terminate child jobs, we must group them to a job.
+    HANDLE job_handle = CreateJobObjectA(NULL, NULL);
+    if (GetLastError() != 0) {
+        throw std::runtime_error(
+            "CreateJobObjectA failed: ERROR "
+            + std::to_string(GetLastError()));
+    }
+    HandleGuard job_handle_guard(job_handle);
+    if (!AssignProcessToJobObject(job_handle, pi.hProcess)) {
+        throw std::runtime_error(
+            "AssignProcessToJobObject failed: ERROR "
+            + std::to_string(GetLastError()));
+    }
+
     DWORD timeout = m_timeout; // in s
     timeout = timeout * 1000; // in ms
     if (timeout == 0) { // no time-out
@@ -299,14 +313,9 @@ ExecResult ExecBin::execute() const
                 + std::to_string(GetLastError()) );
 
         case WAIT_TIMEOUT:
-            if (!TerminateProcess(pi.hProcess, 0)) {
+            if (!TerminateJobObject(job_handle, 0)) {
                 throw std::runtime_error(
-                    "TerminateProcess failed: ERROR "
-                    + std::to_string(GetLastError()) );
-            }
-            if (!WaitForSingleObject(pi.hThread, 0)) {
-                throw std::runtime_error(
-                    "WaitForSingleObject failed: ERROR "
+                    "TerminateJobObject failed: ERROR "
                     + std::to_string(GetLastError()) );
             }
             return ExecResult(128, elapsed_in_s);
