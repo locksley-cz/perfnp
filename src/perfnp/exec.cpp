@@ -319,6 +319,21 @@ ExecResult ExecBin::execute() const
         elapsed_in_s += 1;
     }
 
+    QueryInformationJobObject(job_handle, JobObjectExtendedLimitInformation,
+        &job_limits, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION), NULL);
+
+    auto mem_usage = job_limits.PeakJobMemoryUsed;
+    auto mem_usage_kilobytes = (mem_usage / 1000) % 1000;
+    auto mem_usage_megabytes = (mem_usage / 1000 / 1000) % 1000;
+    auto mem_usage_gigabytes = (mem_usage / 1000 / 1000 / 1000);
+
+    std::cout << std::setfill('0') << std::setw(3);
+    std::cerr << "Peak memory usage: "
+        << std::setfill(' ') << std::setw(3) << mem_usage_gigabytes << " "
+        << std::setfill('0') << std::setw(3) << mem_usage_megabytes << " "
+        << std::setfill('0') << std::setw(3) << mem_usage_kilobytes << " kB"
+        << std::endl;
+
     switch (wait_for_child_retval) {
 
         case WAIT_FAILED:
