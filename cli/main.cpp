@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) try {
     std::ofstream csv_output_file;
     if (csv_output_filename == "-") {
         print_job_csv_header(std::cout);
-    } else if (csv_output_filename.is_empty()) {
+    } else if (!csv_output_filename.is_empty()) {
         csv_output_file.open(*csv_output_filename);
         print_job_csv_header(csv_output_file);
     }
