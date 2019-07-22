@@ -8,6 +8,8 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
+#include <iomanip>
+#include <limits>
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/types.h>
@@ -282,12 +284,24 @@ ExecResult ExecBin::execute() const
             + std::to_string(GetLastError()));
     }
     HandleGuard job_handle_guard(job_handle);
+    // Set memory limit for the job
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION job_limits;
+    job_limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_JOB_MEMORY;
+    job_limits.JobMemoryLimit = 1024L * 1024L * 1024L * 4L - 1;
+    if (!SetInformationJobObject(job_handle, JobObjectExtendedLimitInformation,
+                &job_limits, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION) )) {
+        throw std::runtime_error(
+            "SetInformationJobObject failed: ERROR "
+            + std::to_string(GetLastError()));
+    }
+    // Assign the process to the job
     if (!AssignProcessToJobObject(job_handle, pi.hProcess)) {
         throw std::runtime_error(
             "AssignProcessToJobObject failed: ERROR "
             + std::to_string(GetLastError()));
     }
 
+    // Start measuring the elapsed time
     DWORD timeout = m_timeout; // in s
     timeout = timeout * 1000; // in ms
     if (timeout == 0) { // no time-out
