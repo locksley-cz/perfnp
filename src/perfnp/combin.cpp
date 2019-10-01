@@ -15,15 +15,14 @@ namespace { // hide the combine method
 
 // function to print combinations that contain
 // one element from each of the given arrays
-std::vector<CommandLine> combine(
-	const std::vector<std::vector<std::string>>& arr,
-	const std::string cmd_local)
+std::vector<std::vector<std::string>> combine(
+	const std::vector<std::vector<std::string>>& input)
 {
-	std::vector<CommandLine> output; // return value
-	const size_t n = arr.size(); // number of arrays
+	std::vector<std::vector<std::string>> output; // return value
+	const size_t n = input.size(); // number of arrays
 
     if (n == 0) {
-        return std::vector<CommandLine>();
+        return {};
     }
 
 	// keeps track of next element in each of the n arrays
@@ -35,16 +34,15 @@ std::vector<CommandLine> combine(
 		std::vector<std::string> vector_string_temp;
 		for (int i = 0; i < n; i++) {
 			// std::cout << arr[i][indices[i]] << " ";
-			vector_string_temp.push_back(arr[i][indices[i]]);
+			vector_string_temp.push_back(input[i][indices[i]]);
 		}
 
-		CommandLine cmdline_local(cmd_local, vector_string_temp);
-		output.push_back(cmdline_local);
+		output.push_back(vector_string_temp);
 
 		// find the rightmost array that has more elements left
 		// after the current element in that array
 		size_t next = n - 1;
-		while (next >= 0 && (indices[next] + 1 >= arr[next].size())) {
+		while (next >= 0 && (indices[next] + 1 >= input[next].size())) {
 			if (next > 0) {
 				next--; // proceed to the next array
 			} else {
@@ -65,41 +63,69 @@ std::vector<CommandLine> combine(
 	}
 } // combine
 
+void replace(std::string& haystack,
+       const std::string& needle,
+       const std::string& replacement)
+{
+    std::size_t pos;
+    while ((pos = haystack.find(needle)) != std::string::npos) {
+        haystack = haystack.replace(
+            pos, needle.length(),
+            replacement);
+
+    }
+} // replace
+
 } // anonymous namespace
+
+
 
 std::vector<CommandLine> perfnp::combine_command_lines(const Config& config)
 {
+    auto command = config.command();
     auto arguments = config.arguments();
 	auto parameters = config.parameters();
 
-	// create and fill vector of vectors string which will be combine
-	std::vector<std::vector<std::string>> strings_to_combine;
-	for (const auto argument : arguments.values()) {
+    if (parameters.empty()) {
+        return { CommandLine(command, arguments.values()) };
+    }
 
-		bool find_par_arg = false;
-		for (const auto param : parameters) {
-			if (argument == "$" + param.name()) {
-				find_par_arg = true;
-				strings_to_combine.push_back(param.values());
-				break;
-			}
-		}
+    std::vector<CommandLine> out;
 
-		if (find_par_arg == false) {
-			strings_to_combine.push_back({argument});
-		}
-	}
+    std::vector<std::vector<std::string>> param_values;
+    for (const auto parameter : parameters) {
+        param_values.push_back(parameter.values());
+    }
+    
+    std::vector<std::vector<std::string>> combinations = combine(param_values);
+    for (const auto& combination : combinations) {
+        assert(combination.size() == parameters.size());
 
-	// std::cout << "strings to make all combinations:" << std::endl;
-	// for (int i = 0; i < strings_to_combine.size(); i++) {
-	// 	for (int j = 0; j < strings_to_combine.at(i).size(); j++) {
-	// 		std::cout << strings_to_combine.at(i).at(j) << " ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
+        std::vector<std::string> substituted;
+        for (std::string argument : arguments.values()) {
+            for (size_t i = 0; i < parameters.size(); ++i) {
+                replace(argument, "%" + parameters[i].name() + "%", combination[i]);
+            }
+            substituted.emplace_back(std::move(argument));
+        }
+        out.emplace_back(CommandLine(command, std::move(substituted)));
+    }
+    return out;
+}
 
-    auto command = config.command();
-	// std::cout << "Making all combinations: " << std::endl;
- 	// std::cout << command << std::endl;
-	return combine(strings_to_combine, command);
+std::ostream& operator<<(std::ostream& os, const perfnp::CommandLine& cl)
+{
+    os << "CommandLine(\"" << cl.m_command << "\", {"; 
+
+    bool first = true;
+    for (const auto& v : cl.m_arguments) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+
+        os << "\"" << v << "\"";
+    }
+    os << "})";
+    return os;
 }

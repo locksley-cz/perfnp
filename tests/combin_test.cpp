@@ -25,7 +25,7 @@ TEST_CASE("combine_command_lines")
     {
         Config c(R"({
             "command" : "hello",
-            "arguments" : ["world", "$a", "$b"],
+            "arguments" : ["world", "%a%", "%b%"],
             "parameters" : {
                 "a" : ["1", "2"],
                 "b" : ["x", "y"]
@@ -37,16 +37,16 @@ TEST_CASE("combine_command_lines")
         CommandLine exp3("hello", {"world", "2", "x"});
         CommandLine exp4("hello", {"world", "2", "y"});
 
-        REQUIRE(combine_command_lines(c) ==
+        REQUIRE_THAT(combine_command_lines(c), Catch::Matchers::UnorderedEquals(
             std::vector<CommandLine>{exp1, exp2, exp3, exp4}
-        );
+        ));
     }
 
     SECTION("more complex unit test")
     {
         Config c(R"({
             "command" : "hello",
-            "arguments" : ["$c", "world", "$a", "$b"],
+            "arguments" : ["%c%", "world", "%a%", "%b%"],
             "parameters" : {
                 "a" : ["1", "2"],
                 "b" : "1",
@@ -60,16 +60,16 @@ TEST_CASE("combine_command_lines")
         CommandLine exp4("hello", {"y", "world", "2", "1"});
         CommandLine exp5("hello", {"z", "world", "1", "1"});
         CommandLine exp6("hello", {"z", "world", "2", "1"});
-        REQUIRE(combine_command_lines(c) ==
+        REQUIRE_THAT(combine_command_lines(c), Catch::Matchers::UnorderedEquals(
             std::vector<CommandLine>{exp1, exp2, exp3, exp4, exp5, exp6}
-        );
+        ));
     }
 
     SECTION("only one parameter")
     {
         Config c(R"({
             "command" : "hello",
-            "arguments" : ["$x"],
+            "arguments" : ["%x%"],
             "parameters" : {
                 "x" : "1"
             }

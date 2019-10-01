@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <ostream>
 
 #include "perfnp/config.hpp"
 
@@ -36,9 +37,16 @@ struct CommandLine {
             && m_arguments == rhs.m_arguments;
     }
 
+    bool operator!= (const CommandLine& rhs) const {
+        return ! ((*this) == rhs);
+    }
+
 }; // CommandLine
 
 std::vector<CommandLine> combine_command_lines(const Config& config);
 
 } // perfnp
+
+std::ostream& operator<<(std::ostream& os, const perfnp::CommandLine& cl);
+
 #endif // COMBIN_CONFIG_H_
