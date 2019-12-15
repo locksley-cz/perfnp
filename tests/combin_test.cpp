@@ -25,59 +25,43 @@ TEST_CASE("combine_command_lines")
     {
         Config c(R"({
             "command" : "hello",
-            "arguments" : ["world", "$a", "$b"],
-            "parameters" : {
-                "a" : ["1", "2"],
-                "b" : ["x", "y"]
-            }
+            "arguments" : ["world", "%a%", "%b%"],
+            "parameters" : [
+                { "name" : "a", "values" : ["1", "2"] },
+                { "name" : "b", "values" : ["x", "y"] }
+            ]
         })"_json);
 
-        CommandLine exp1("hello", {"world", "1", "x"});
-        CommandLine exp2("hello", {"world", "1", "y"});
-        CommandLine exp3("hello", {"world", "2", "x"});
-        CommandLine exp4("hello", {"world", "2", "y"});
+        CmdWithArgs exp1(0, "hello", {"world", "1", "x"});
+        CmdWithArgs exp2(1, "hello", {"world", "1", "y"});
+        CmdWithArgs exp3(2, "hello", {"world", "2", "x"});
+        CmdWithArgs exp4(3, "hello", {"world", "2", "y"});
 
-        REQUIRE(combine_command_lines(c) ==
-            std::vector<CommandLine>{exp1, exp2, exp3, exp4}
-        );
+        REQUIRE_THAT(combine_command_lines(c), Catch::Matchers::UnorderedEquals(
+            std::vector<CmdWithArgs>{exp1, exp2, exp3, exp4}
+        ));
     }
 
     SECTION("more complex unit test")
     {
         Config c(R"({
             "command" : "hello",
-            "arguments" : ["$c", "world", "$a", "$b"],
-            "parameters" : {
-                "a" : ["1", "2"],
-                "b" : "1",
-                "c" : ["x", "y", "z"]
-            }
+            "arguments" : ["%c%", "world", "%a%", "%b%"],
+            "parameters" : [
+                { "name" : "a", "values" : ["1", "2"] },
+                { "name" : "b", "values" : ["1"] },
+                { "name" : "c", "values" : ["x", "y", "z"] }
+            ]
         })"_json);
 
-        CommandLine exp1("hello", {"x", "world", "1", "1"});
-        CommandLine exp2("hello", {"x", "world", "2", "1"});
-        CommandLine exp3("hello", {"y", "world", "1", "1"});
-        CommandLine exp4("hello", {"y", "world", "2", "1"});
-        CommandLine exp5("hello", {"z", "world", "1", "1"});
-        CommandLine exp6("hello", {"z", "world", "2", "1"});
-        REQUIRE(combine_command_lines(c) ==
-            std::vector<CommandLine>{exp1, exp2, exp3, exp4, exp5, exp6}
-        );
-    }
-
-    SECTION("only one parameter")
-    {
-        Config c(R"({
-            "command" : "hello",
-            "arguments" : ["$x"],
-            "parameters" : {
-                "x" : "1"
-            }
-        })"_json);
-
-        CommandLine exp1("hello", {"1"});
-        REQUIRE(combine_command_lines(c) ==
-            std::vector<CommandLine>{exp1}
-        );
+        CmdWithArgs exp1(0, "hello", {"x", "world", "1", "1"});
+        CmdWithArgs exp3(1, "hello", {"y", "world", "1", "1"});
+        CmdWithArgs exp5(2, "hello", {"z", "world", "1", "1"});
+        CmdWithArgs exp2(3, "hello", {"x", "world", "2", "1"});
+        CmdWithArgs exp4(4, "hello", {"y", "world", "2", "1"});
+        CmdWithArgs exp6(5, "hello", {"z", "world", "2", "1"});
+        REQUIRE_THAT(combine_command_lines(c), Catch::Matchers::UnorderedEquals(
+            std::vector<CmdWithArgs>{exp1, exp2, exp3, exp4, exp5, exp6}
+        ));
     }
 }

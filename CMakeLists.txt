@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.2)
-project(perfnp LANGUAGES CXX VERSION 0.0.1)
+cmake_minimum_required(VERSION 3.5)
+project(perfnp LANGUAGES CXX VERSION 1.1.1)
 
 # Load coverage-related stuff
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/misc/cmake")
@@ -23,6 +23,7 @@ set(PERFNP_CLI_DIR ${PERFNP_DIR}/cli)
 set(PERFNP_TEST_DIR ${PERFNP_DIR}/tests)
 
 set(PERFNP_HEADER_FILES
+    ${PERFNP_LIB_DIR}/cmd_line.hpp
     ${PERFNP_LIB_DIR}/combin.hpp
     ${PERFNP_LIB_DIR}/config.hpp
     ${PERFNP_LIB_DIR}/dataset.hpp
@@ -31,26 +32,37 @@ set(PERFNP_HEADER_FILES
     ${PERFNP_LIB_DIR}/option.hpp
     ${PERFNP_LIB_DIR}/scheduler.hpp
     ${PERFNP_LIB_DIR}/tools.hpp
+    ${PERFNP_LIB_DIR}/sql_database.hpp
+    ${PERFNP_LIB_DIR}/base64.hpp
 )
 
 set(PERFNP_LIB_FILES
+    ${PERFNP_LIB_DIR}/cmd_line.cpp
     ${PERFNP_LIB_DIR}/combin.cpp
     ${PERFNP_LIB_DIR}/config.cpp
     ${PERFNP_LIB_DIR}/dataset.cpp
     ${PERFNP_LIB_DIR}/exec.cpp
     ${PERFNP_LIB_DIR}/logger.cpp
+    ${PERFNP_LIB_DIR}/sql_database.cpp
+    ${PERFNP_LIB_DIR}/base64.cpp
 )
 
 set(PERFNP_TEST_FILES
+    ${PERFNP_TEST_DIR}/cmd_line_test.cpp
     ${PERFNP_TEST_DIR}/combin_test.cpp
     ${PERFNP_TEST_DIR}/config_test.cpp
     ${PERFNP_TEST_DIR}/dataset_test.cpp
     ${PERFNP_TEST_DIR}/exec_test.cpp
     ${PERFNP_TEST_DIR}/tools_test.cpp
+    ${PERFNP_TEST_DIR}/sql_test.cpp
 )
 
-# Use all single-header libraries
-include_directories(SYSTEM ${PERFNP_DIR}/lib)
+# JSON parsing library
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(lib/nlohmann)
+
+# SQlite C++ wrapper
+add_subdirectory(lib/sqlitecpp)
 
 # Use folders to group files when generating project files
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -65,6 +77,14 @@ target_include_directories(libperfnp PUBLIC
     $<BUILD_INTERFACE:${PERFNP_DIR}/src>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
+if(UNIX AND NOT APPLE) # Linux
+   target_link_libraries(libperfnp nlohmann_json::nlohmann_json SQLiteCpp sqlite3 pthread dl)
+elseif(UNIX AND APPLE) # Mac OS
+   target_link_libraries(libperfnp nlohmann_json::nlohmann_json SQLiteCpp sqlite3 pthread)
+else() # Windows
+   target_link_libraries(libperfnp nlohmann_json::nlohmann_json SQLiteCpp sqlite3)
+endif()
+
 # Effectively set C++11 (at least)
 target_compile_features(libperfnp
   INTERFACE

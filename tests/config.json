@@ -1,10 +1,11 @@
 {
     "timeout" : 60,
+    "repetition": 5,
     "command" : "golem",
     "arguments" : ["$blockvar", "$parameter", "$file"],
     "parameters" : {
         "blockvar" : ["--with-exact-block-var", "--without-exact-block-var"],
         "parameter" : "--no-hinter",
-        "file" : ["800024.json", "801281.json"]
+        "file" : ["800024.json"]
     }
 }

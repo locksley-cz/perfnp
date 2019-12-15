@@ -67,8 +67,8 @@ TEST_CASE("Config::arguments")
 
         SECTION("three arguments")
         {
-            Config c(R"({"arguments":["$blockvar", "$parameter", "$file"] })"_json);
-            Arguments expected({"$blockvar", "$parameter", "$file"});
+            Config c(R"({"arguments":["$blockvar", "%parameter%", "$file"] })"_json);
+            Arguments expected({"$blockvar", "%parameter%", "$file"});
             REQUIRE(c.arguments() == expected);
         }
     }
@@ -111,9 +111,12 @@ TEST_CASE("Config::parameters")
     {
         SECTION("one parameter with values")
         {
-            Config c(R"({"parameters":{
-                "param_name" : ["blockvar", "parameter", "file"]
-            }})"_json);
+            Config c(R"({"parameters": [
+                {
+                    "name" : "param_name",
+                    "values" : ["blockvar", "parameter", "file"]
+                }
+            ]})"_json);
 
             Parameter expected2("param_name",
                 std::vector<std::string>{
@@ -127,7 +130,7 @@ TEST_CASE("Config::parameters")
     {
         SECTION("no parameters at all")
         {
-            Config c(R"({ "parameters":{} })"_json);
+            Config c(R"({ "parameters":[] })"_json);
             REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
     }
@@ -136,31 +139,39 @@ TEST_CASE("Config::parameters")
     {
         SECTION("empty name")
         {
-            Config c(R"({"parameters":{"":[]} })"_json);
+            Config c(R"({"parameters":[
+                { "name" : "", "values" : ["a"] }
+            ]})"_json);
             REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
 
         SECTION("empty set of value")
         {
-            Config c(R"({"parameters":{"v":[]} })"_json);
+            Config c(R"({"parameters":[
+                { "name" : "v", "values" : [] }
+            ]})"_json);
             REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
 
         SECTION("invalid type of the map")
         {
-            Config c(R"({ "parameters":[] })"_json);
+            Config c(R"({ "parameters":{} })"_json);
             REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
 
         SECTION("invalid type of the values")
         {
-            Config c(R"({ "parameters":{ "v":2 } })"_json);
+            Config c(R"({"parameters":[
+                { "name" : "a", "values" : {} }
+            ]})"_json);
             REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
 
         SECTION("invalid type of a value")
         {
-            Config c(R"({ "parameters":{ "v":[2] } })"_json);
+            Config c(R"({"parameters":[
+                { "name" : "a", "values" : 123 }
+            ]})"_json);
             REQUIRE_THROWS_AS(c.parameters(), std::runtime_error);
         }
     }

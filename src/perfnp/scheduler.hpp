@@ -15,6 +15,7 @@
 #include <vector>
 #include <iostream>
 
+
 namespace perfnp {
 
 /*!
@@ -22,20 +23,19 @@ namespace perfnp {
  */
 template<typename ResultCallback>
 Dataset execute_all_runs(
-    const std::vector<CommandLine>& commands,
+    const std::vector<CmdWithArgs>& commands,
     unsigned timeout,
-    ResultCallback callback
-) {
-
+    ResultCallback callback)
+{
     std::vector<ExecResult> results_all;
-    for (size_t i=0; i < commands.size(); i++) {
 
-        ExecBin my_exec(
-            commands.at(i).m_command,
-            commands.at(i).m_arguments, timeout);
+    for (size_t i=0; i < commands.size(); i++) {
+        const auto& cwa = commands.at(i);
+
+        ExecBin my_exec(cwa.command(), cwa.arguments(), timeout);
         ExecResult my_result = my_exec.execute();
 
-        callback(commands, i, timeout, my_result);
+        callback(cwa, timeout, my_result);
 
         results_all.push_back(my_result);
     }
@@ -49,14 +49,12 @@ Dataset execute_all_runs(
  * Executes all commands and creates a dataset out of the results.
  */
 Dataset execute_all_runs(
-    const std::vector<CommandLine>& commands,
+    const std::vector<CmdWithArgs>& commands,
+    const Config& config,
     unsigned timeout
 ) {
-    return execute_all_runs<>(
-        commands, timeout,
-        [](const std::vector<CommandLine>&,
-            size_t, unsigned, ExecResult)
-        {}
+    return execute_all_runs<>(commands, timeout,
+        [](const CmdWithArgs&, unsigned, ExecResult){}
     );
 }
 

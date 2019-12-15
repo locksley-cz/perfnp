@@ -1,0 +1,14 @@
+{
+    "timeout" : 3,
+    "repetition": 0,
+    "command" : "sleep",
+    "arguments" : ["%time%"],
+    "parameters" : {
+        "time" : ["1", "2", "3", "4"]
+    },
+    "logging" : {
+      "job" : {
+        "csv" : "sleep.csv"
+      }
+    }
+}
