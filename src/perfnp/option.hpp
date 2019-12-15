@@ -19,7 +19,7 @@ public:
 
     bool is_empty() const
     {
-        return !static_cast<bool>(m_object);
+        return static_cast<bool>(m_object);
     }
 
     T& operator*() const

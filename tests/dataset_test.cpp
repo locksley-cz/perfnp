@@ -61,10 +61,6 @@ TEST_CASE("Dataset::mad_runtime_of_all_runs")
             // median of absolute differences is 1 (= the middle value)
             REQUIRE(d.mad_runtime_of_all_runs() == 1);
         }
-    /*    SECTION("All samples are used, regardless of the exit code") {
-            Dataset d(10, { {0,3}, {1,4}, {2,5}, {3,6}, {4,7} });
-            REQUIRE(d.mad_runtime_of_all_runs() == 1);
-        }*/
         SECTION("Overly large runtime is trimmed") {
             Dataset d(10, { {0,2}, {0,20} });
             // median of samples is 6

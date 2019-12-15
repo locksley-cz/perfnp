@@ -8,7 +8,7 @@
 
 #include "perfnp/combin.hpp"
 #include "perfnp/exec.hpp"
-
+#include "perfnp/config.hpp"
 namespace perfnp {
 
 //! Prints the CSV header for \link print_job_csv_line format.
@@ -16,11 +16,7 @@ void print_job_csv_header(std::ostream& o);
 
 //! Prints one CSV line for every executed job.
 void print_job_csv_line(std::ostream& o,
-    const std::vector<CommandLine>& commands,
-    size_t job_index,
-    unsigned timeout,
-    ExecResult result
-);
+    const CmdWithArgs& command, unsigned timeout, ExecResult result);
 
 } // perfnp
 #endif // PERFNP_CORE_H_

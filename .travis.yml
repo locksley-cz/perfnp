@@ -21,7 +21,8 @@ matrix:
       addons:
           apt:
               sources: *all_sources
-              packages: ['clang-3.5']
+              packages:
+                - clang-3.5
       env: COMPILER='clang++-3.5' CXX_STANDARD='11'
 
     # Temporarily disabled due to a travis bug
@@ -40,8 +41,10 @@ matrix:
       addons:
         apt:
           sources: *all_sources
-          packages: ['g++-4.8', 'lcov']
-      env: COMPILER='g++-4.8' CODECOV=1 CXX_STANDARD='11'
+          packages:
+              - g++-5
+              - lcov
+      env: COMPILER='g++-5' CODECOV=1 CXX_STANDARD='11'
 
     - os: linux
       compiler: gcc

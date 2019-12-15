@@ -25,10 +25,11 @@ First create a config file `config.json`:
 {
     "timeout" : 60,
     "command" : "nauty",
-    "arguments" : ["$input_file"],
-    "parameters" : {
-        "input_file" : ["graph1.txt", "graph2.txt", , "graph3.txt"]
-    }
+    "arguments" : ["%input_file%"],
+    "parameters" : [{
+        "name" : "input_file",
+        "values" : ["graph1.txt", "graph2.txt", "graph3.txt"]
+    }]
 }
 ```
 

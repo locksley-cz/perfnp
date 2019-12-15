@@ -20,7 +20,7 @@ namespace perfnp {
 class Dataset {
     //! Timeout which was used during the execution
     unsigned m_timeout;
-
+    //unsigned m_repetition;
     //! Results of all runs
     std::vector<ExecResult> m_results;
 
@@ -28,6 +28,7 @@ public:
     //! Initialize all fields by the given values
     Dataset(unsigned timeout, std::vector<ExecResult> results)
     : m_timeout(timeout)
+    //, m_repetition(repetition)
     , m_results(std::move(results))
     {}
 

@@ -6,7 +6,7 @@
 #include "config.hpp"
 #include <iostream>
 #include <fstream>
-//#include <stdexcept>
+#include <sstream>
 #include <cassert>
 #include <string>
 
@@ -84,57 +84,71 @@ std::vector<Parameter> Config::parameters() const {
         return {};
     }
 
-    if (!m_json.at("parameters").is_object()) {
+    if (!m_json.at("parameters").is_array()) {
         throw std::runtime_error("Configuration JSON's"
-            " \"parameters\" field is not an object.");
+            " \"parameters\" field is not an array.");
     }
 
     if (m_json.at("parameters").empty()) {
         throw std::runtime_error("Configuration JSON's"
-            " \"parameters\" field is empty.");
+            " \"parameters\" array is empty.");
     }
 
     std::vector<Parameter> retval;
 
     std::vector<Parameter> v_parameters;
-    for (const auto& kv : m_json.at("parameters").items()) {
+    for (const auto& j_param : m_json.at("parameters")) {
 
-        if (kv.key().size() == 0) {
+        // Name
+
+        if (j_param.find("name") == j_param.end()) {
+            throw std::runtime_error("Configuration JSON's"
+                " \"parameters\"[] has not an \"name\" field.");
+        }
+
+        const auto& j_name = j_param.at("name");
+
+        if (!j_name.is_string()) {
+            throw std::runtime_error("Configuration JSON's"
+                " \"parameters\"[].\"name\" is not a string.");
+        }
+
+        std::string s_name = j_name.get<std::string>();
+
+        if (s_name.empty()) {
+            throw std::runtime_error("One parameter's "
+                "name in the configuration JSON is empty.");
+        }
+
+        if (j_param.find("values") == j_param.end()) {
+            throw std::runtime_error("Configuration JSON's"
+                " \"parameters\"[] has not the \"values\" field.");
+        }
+
+        const auto& j_values = j_param.at("values");
+
+        if (!j_values.is_array()) {
+            throw std::runtime_error("Configuration JSON's"
+                " \"parameters\"[].\"values\" is not an array.");
+        }
+
+        std::vector<std::string> s_values;
+        for (const auto& j_value : j_values) {
+            if (!j_value.is_string()) {
+                throw std::runtime_error(std::string(
+                    "Parameters in the configuration JSON take"
+                    " string values, but variable '") + s_name
+                    + "' got '" + j_value.dump() + "' instead.");
+            }
+            s_values.push_back(j_value.get<std::string>());
+        }
+
+        if (s_values.empty()) {
             throw std::runtime_error("Parameters in the"
-                " configuration JSON must have a non-empty name.");
+                " configuration JSON must have at least 1 value.");
         }
 
-        // Variable has a single value.
-        if (kv.value().is_string()) {
-            v_parameters.push_back(Parameter(kv.key(), {kv.value().get<std::string>()}));
-
-        // Variable has multiple values.
-        } else if (kv.value().is_array()) {
-
-            std::vector<std::string> s_values;
-            for (const auto& j_value : kv.value()) {
-                if (!j_value.is_string()) {
-                    throw std::runtime_error(std::string(
-                        "Parameters in the configuration JSON take"
-                        " string values, but variable '") + kv.key()
-                        + "' got '" + j_value.dump() + "' instead.");
-                }
-                s_values.push_back(j_value.get<std::string>());
-            }
-
-            if (s_values.empty()) {
-                throw std::runtime_error("Parameters in the"
-                    " configuration JSON must have at least 1 value.");
-            }
-
-            v_parameters.push_back(Parameter(kv.key(), s_values));
-
-        } else {
-            throw std::runtime_error(std::string(
-                "Parameters in the configuration JSON take values"
-                " as a vector of strings, but variable '") + kv.key()
-                + "' got '" + kv.value().dump() + "' instead.");
-        }
+        v_parameters.push_back(Parameter(j_name, s_values));
     }
 
     return v_parameters;
@@ -173,4 +187,20 @@ Optional<std::string> Config::logging_job_csv_file() const
     }
 
     return Optional<std::string>::make(j_csv->get<std::string>());
+}
+
+
+
+std::ostream& perfnp::operator<<(std::ostream& os, const Config& cfg)
+{
+    return os << cfg.m_json;
+}
+
+
+
+std::string Config::to_string() const
+{
+    std::stringstream stream;
+    stream << *this;
+    return stream.str();
 }

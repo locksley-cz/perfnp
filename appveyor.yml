@@ -22,6 +22,7 @@ configuration:
   - Release
 
 before_build:
+  - git submodule update --init --recursive
   - ps: . .\misc\appveyor\library.ps1; AppVeyorConfigure
 
 build:

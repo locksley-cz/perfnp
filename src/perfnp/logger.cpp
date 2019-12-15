@@ -14,11 +14,13 @@ using namespace perfnp;
 
 void perfnp::print_job_csv_header(std::ostream& o)
 {
+
     // Make sure to revert all stdw and similar
     tools::StreamFormatGuard sfg(o);
 
     o << std::setw(10) << "Job ID" << ";";
     o << std::setw(10) << "Runtime" << ";";
+    //o << std::setw(10) << "Repetition" << ";";
     o << std::setw(10) << "Exit code" << ";";
 
     o << std::setw(0);
@@ -28,24 +30,17 @@ void perfnp::print_job_csv_header(std::ostream& o)
 
 
 void perfnp::print_job_csv_line(std::ostream& o,
-    const std::vector<CommandLine>& commands,
-    size_t job_index,
-    unsigned timeout,
-    ExecResult result)
+    const CmdWithArgs& command, unsigned timeout, ExecResult result)
 {
     // Make sure to revert all stdw and similar
     tools::StreamFormatGuard sfg(o);
 
-    auto& command = commands.at(job_index);
-
-    o << std::setw(10) << job_index << ";";
+    o << std::setw(10) << command.job_index() << ";";
     o << std::setw(10) << result.runtime() << ";";
+//    o << std::setw(10) << rep_index << ";";
     o << std::setw(10) << result.exit_code() << ";";
 
     o << std::setw(0) << " ";
-    o << command.m_command;
-    for (const auto& arg : command.m_arguments) {
-        o << " \"" << arg << "\"";
-    }
+    o << command.escape_for_native_shell();
     o << std::endl;
 } // print_csv_line

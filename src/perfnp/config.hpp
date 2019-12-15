@@ -120,6 +120,15 @@ public:
     //! File name for the CSV job log
     Optional<std::string> logging_job_csv_file() const;
 
+    //! Print the JSON to a string
+    std::string to_string() const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Config& cfg);
 }; // Config
+
+//! Print the config JSON to a stream
+std::ostream& operator<<(std::ostream& os, const Config& cfg);
+
+
 } // perfnp
 #endif // PERFNP_CONFIG_H_
