@@ -40,7 +40,8 @@ TEST_CASE("ExecBin::execute")
         ExecBin eb("sleep", { "1" });
         auto result = eb.execute();
         REQUIRE(result.exit_code() == 0);
-        REQUIRE(result.runtime() == 2);
+        REQUIRE(result.runtime() >= 1);
+        REQUIRE(result.runtime() <= 2);
     }
 #endif
 }
