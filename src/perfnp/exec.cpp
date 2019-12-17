@@ -109,13 +109,7 @@ ExecResult ExecBin::execute() const
 
         // 4) Child exited because of a signal
         } else if (WIFSIGNALED(status)) {
-            // Signal is the SIGALRM = timeout occurred
-            if (WTERMSIG(status) == SIGALRM) {
-                return ExecResult(-1, elapsed_in_s);
-            }
-
-            throw std::runtime_error("unknown signal: "
-                + std::to_string(WTERMSIG(status)));
+            return ExecResult(WTERMSIG(status), elapsed_in_s);
         } else {
             throw std::runtime_error("cause of death not determined");
         }
