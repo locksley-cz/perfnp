@@ -33,8 +33,10 @@ Dataset execute_all_runs(
         const auto& cwa = commands.at(i);
 
         ExecBin my_exec(cwa.command(), cwa.arguments(), timeout);
+        std::cerr << "About the start the process." << std::endl;
         ExecResult my_result = my_exec.execute();
 
+        std::cerr << "Process ended, calling the CB." << std::endl;
         callback(cwa, timeout, my_result);
 
         results_all.push_back(my_result);

@@ -32,15 +32,17 @@ void perfnp::print_job_csv_header(std::ostream& o)
 void perfnp::print_job_csv_line(std::ostream& o,
     const CmdWithArgs& command, unsigned timeout, ExecResult result)
 {
+    std::cerr << "Writing main part of the CSV part." << std::endl;
+
     // Make sure to revert all stdw and similar
     tools::StreamFormatGuard sfg(o);
 
     o << std::setw(10) << command.job_index() << ";";
     o << std::setw(10) << result.runtime() << ";";
-//    o << std::setw(10) << rep_index << ";";
     o << std::setw(10) << result.exit_code() << ";";
 
     o << std::setw(0) << " ";
+    std::cerr << "About to escape for native shell." << std::endl;
     o << command.escape_for_native_shell();
     o << std::endl;
 } // print_csv_line

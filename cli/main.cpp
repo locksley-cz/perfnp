@@ -66,12 +66,14 @@ int main(int argc, char* argv[]) try {
     auto dataset = execute_all_runs(jobs, config.timeout(),
         [&](const CmdWithArgs& cwa, unsigned timeout, ExecResult result)
         {
+            std::cerr << "Job " << cwa.job_index() << " has finished." << std::endl;
             if (csv_output_filename == "-") {
                 print_job_csv_line(std::cout, cwa, timeout, result);
             } else if (csv_output_file.is_open()) {
                 print_job_csv_line(csv_output_file, cwa, timeout, result);
             }
 
+            std::cerr << "Storing the record in the database." << std::endl;
             db.on_job_finished(run_id, cwa, timeout, result);
         });
 
